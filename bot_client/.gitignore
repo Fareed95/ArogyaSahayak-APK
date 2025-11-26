@@ -1,0 +1,11 @@
+.next 
+node_modules
+.env
+.env.local
+.env.*.local
+.env.*
+.DS_Store
+*.log
+.vscode/
+.idea/
+*.iml
