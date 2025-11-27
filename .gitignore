@@ -10,3 +10,4 @@ instance/
 .idea/
 .vscode/
 *.iml           
+venv
