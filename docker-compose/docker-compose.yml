@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  django:
+    build: ../server
+    container_name: django-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../server:/app
+    depends_on:
+      - fastapi
+    env_file:
+      - ../server/.env  # optional, if you have one
+
+  fastapi:
+    build: ../models
+    container_name: fastapi-backend
+    ports:
+      - "8001:8001"
+    volumes:
+      - ../models:/app
+    env_file:
+      - ../models/.env  # optional
