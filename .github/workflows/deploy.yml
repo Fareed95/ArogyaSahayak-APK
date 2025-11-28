@@ -21,8 +21,8 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script: |
-          cd /home/ubuntu/aarogya-sahyak/ArogyaSahayak-APK
-        
+          cd /home/ubuntu/arogya-sahayak/ArogyaSahayak-APK
+
           echo ">>> Fetching latest changes..."
           git fetch --all
           git reset --hard origin/production
