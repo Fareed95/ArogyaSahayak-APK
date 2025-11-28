@@ -12,4 +12,5 @@ instance/
 *.iml           
 venv
 server-env/
-modells-env/
+models-env/
+venv-models/
