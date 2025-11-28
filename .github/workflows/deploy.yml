@@ -21,9 +21,21 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script: |
-          cd /home/ubuntu/hackathon/Flutter-demo
+          cd /home/ubuntu/aarogya-sahyak
+
+          echo ">>> Fetching latest changes..."
           git fetch --all
           git reset --hard origin/production
-          docker-compose down
-          docker-compose pull
-          docker-compose up -d --build
+
+          echo ">>> Removing client & bot_client folders..."
+          rm -rf client || true
+          rm -rf bot_client || true
+
+          echo ">>> Pulling latest docker images..."
+          docker compose down || docker-compose down || true
+          docker compose pull || docker-compose pull || true
+
+          echo ">>> Building and starting containers..."
+          docker compose up -d --build || docker-compose up -d --build
+
+          echo ">>> Deployment finished 🎉"
