@@ -11,7 +11,6 @@ import re
 import time
 import logging
 
-# Selenium + webdriver-manager
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -100,12 +99,7 @@ def create_driver():
 # -----------------------
 
 def build_search_queries(city: str, restrictions: List[str]) -> List[str]:
-    """
-    Produce a set of Google queries that reliably return restaurant pages.
-    IMPORTANT: avoid putting dietary restrictions directly into Google queries
-    (Google often returns list/collection pages and not single restaurant pages).
-    Instead we search for restaurant/menu pages in the city, then filter by restrictions later.
-    """
+
     city = city.strip()
     queries = [
         f"restaurants in {city} site:zomato.com",
@@ -124,13 +118,6 @@ def build_search_queries(city: str, restrictions: List[str]) -> List[str]:
     return out
 
 def post_process_extraction(raw_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """
-    Deduplicate, sanitize, normalize menu items returned by scraper or AI fallback.
-    - normalize whitespace
-    - drop extremely short/long names
-    - unify price format when possible
-    - return up to 50 items (caller typically limits further)
-    """
     seen = set()
     cleaned = []
     for it in raw_items:
@@ -255,9 +242,6 @@ def improved_score_item(item_name: str, restrictions: List[str]) -> Dict[str, An
 
     return {"score": base_score, "notes": " | ".join(notes)}
 
-# -----------------------
-# Google search helper
-# -----------------------
 def google_custom_search(query: str, num: int = 10):
     """Simple wrapper for Google Custom Search"""
     url = "https://www.googleapis.com/customsearch/v1"
@@ -272,16 +256,12 @@ def google_custom_search(query: str, num: int = 10):
         logging.warning(f"Google Search Error for query '{query}': {e}")
         return []
 
-# -----------------------
-# Scrapers (Zomato / Swiggy) - keep your selectors but slightly improved
-# -----------------------
 def scrape_zomato_menu(driver, url: str, restaurant_name: str) -> List[dict]:
     logging.info(f"[ZOMATO] Scraping {url}")
     menu_items = []
     try:
         driver.get(url)
         time.sleep(4)
-        # selectors prioritized: data-testid, then likely H-tags, then generic classes
         selectors = [
             "[data-testid='menu-item-name']",
             "h4[class*='sc-']",
@@ -318,7 +298,6 @@ def scrape_zomato_menu(driver, url: str, restaurant_name: str) -> List[dict]:
             except Exception:
                 continue
 
-        # fallback: regex extraction from page source
         if len(menu_items) < 3:
             page_text = driver.page_source
             patterns = [r'"name":"([^"]{3,100})"', r'"dishName":"([^"]{3,100})"', r'>([^<]{3,100})<\/h4>']
@@ -397,7 +376,6 @@ def scrape_swiggy_menu(driver, url: str, restaurant_name: str) -> List[dict]:
         logging.error(f"[SWIGGY] Error scraping {url}: {e}")
         return []
 
-# Optional AI fallback already in your code; we keep it unchanged but call only when needed.
 def extract_menu_with_ai(page_html: str, restaurant_name: str) -> List[dict]:
     """Use GROQ as last-resort - existing implementation preserved (if GROQ_API_KEY present)."""
     if not GROQ_API_KEY:
@@ -442,9 +420,6 @@ Rules:
         logging.error("AI extraction error: %s", e)
     return []
 
-# -----------------------
-# Simple regex fallback dietary parser (keeps your previous behavior)
-# -----------------------
 def parse_dietary_text_regex(text: str) -> List[str]:
     text_lower = (text or "").lower()
     restrictions = []
@@ -470,13 +445,8 @@ def parse_dietary_text_regex(text: str) -> List[str]:
                 break
     return restrictions if restrictions else ["none"]
 
-# Top-level parse function (keeps behavior but uses regex)
 def parse_dietary_text(text: str) -> List[str]:
     return parse_dietary_text_regex(text)
-
-# -----------------------
-# MAIN ENDPOINT (uses improved helpers)
-# -----------------------
 @app.post("/api/search", response_model=SearchResponse)
 def search_restaurants(request: SearchRequest):
     restrictions = parse_dietary_text(request.text)
@@ -486,7 +456,6 @@ def search_restaurants(request: SearchRequest):
     # Build safe queries (improved)
     queries = build_search_queries(city, restrictions)
 
-    # Collect candidate links from Google Custom Search (prioritize Zomato & Swiggy)
     all_results = []
     for q in queries:
         results = google_custom_search(q, 8)
