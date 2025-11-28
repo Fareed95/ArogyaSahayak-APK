@@ -16,20 +16,39 @@ import re
 import json
 import io
 from google import genai
+import requests
 
 load_dotenv()
 google_api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=google_api_key)
+
+
 @tool
-def login(username: str, password: str) -> str:
+def login(email: str, password: str) -> str:
     """
-    A dummy login tool that simulates user authentication.
+    Hit the backend API to authenticate user via Django/DRF.
     """
-    # In a real application, you would verify the username and password.
-    if username == "user" and password == "pass":
-        return "Login successful!"
-    else:
-        return "Invalid username or password."
+    url = "http://django-backend:8000/api/authentication/login"
+
+    
+    try:
+        response = requests.post(url, json={
+            "email": email,
+            "password": password
+        })
+
+        # If login success
+        if response.status_code == 200:
+            data = response.json()
+            return f"Login Successful! 🎉\nToken: {data.get('jwt')}"
+        
+        # If credentials are wrong
+        return f"Login failed ❌: {response.text}"
+
+    except Exception as e:
+        print(f"Error during login: {e}")
+        return f"Server error 🔥: {str(e)}"
+
 @tool
 def describe_image(image_path: str, prompt: str = "Describe the image") -> str:
     """

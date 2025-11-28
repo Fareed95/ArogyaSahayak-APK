@@ -11,3 +11,6 @@ instance/
 .vscode/
 *.iml           
 venv
+server-env/
+models-env/
+venv-models/

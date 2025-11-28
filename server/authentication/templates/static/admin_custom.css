@@ -1,0 +1,34 @@
+/* Example: Scrapiz custom admin theme */
+
+/* Header / Top bar */
+#header {
+    background-color: #4CAF50 !important;  /* green */
+}
+
+/* Sidebar */
+#nav-sidebar {
+    background-color: #2E7D32 !important;
+}
+
+/* Main content area */
+#content {
+    background-color: #f4f4f4 !important;
+}
+
+/* Buttons */
+input[type="submit"], .button, .submit-row input {
+    background-color: #4CAF50 !important;
+    color: white !important;
+    border-radius: 5px !important;
+}
+
+/* Links */
+a {
+    color: #2E7D32 !important;
+}
+
+/* Error messages */
+.errornote {
+    background-color: #fdd !important;
+    color: #d93025 !important;
+}

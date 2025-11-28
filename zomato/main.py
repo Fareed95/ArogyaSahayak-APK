@@ -77,8 +77,8 @@ class SearchResponse(BaseModel):
 # -----------------------
 # Selenium driver helper
 # -----------------------
+
 def create_driver():
-    """Create headless Chrome driver using webdriver-manager for compatibility."""
     chrome_options = Options()
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
@@ -87,13 +87,37 @@ def create_driver():
     chrome_options.add_argument("--disable-features=VizDisplayCompositor")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    chrome_options.add_argument(
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    )
 
-    service = Service(ChromeDriverManager().install())
+    # STEP 1: Manager path
+    path = ChromeDriverManager().install()
+
+    # STEP 2: If wrong, search correct binary manually
+    if os.path.isdir(path):
+        # folder -> search file
+        for f in os.listdir(path):
+            if f == "chromedriver" or f.startswith("chromedriver-"):
+                path = os.path.join(path, f)
+                break
+    else:
+        # file -> ensure it is executable, else search parent folder
+        folder = os.path.dirname(path)
+        for f in os.listdir(folder):
+            if f == "chromedriver" or f.startswith("chromedriver-"):
+                path = os.path.join(folder, f)
+                break
+
+    # STEP 3: Ensure binary permission
+    if not os.access(path, os.X_OK):
+        os.chmod(path, 0o755)
+
+    # STEP 4: Start driver
+    service = Service(path)
     driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.implicitly_wait(5)
     return driver
-
 # -----------------------
 # Improved helpers (Option A)
 # -----------------------

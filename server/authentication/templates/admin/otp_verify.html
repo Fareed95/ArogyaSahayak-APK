@@ -1,0 +1,108 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}OTP Verification | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block content %}
+<style>
+  body.login {
+    background: #1e1e1e !important; /* Dark background same as login */
+  }
+  .otp-card {
+    max-width: 420px;
+    margin: 80px auto;
+    background: #2c3e50; /* Dark card background */
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    overflow: hidden;
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  .otp-card h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+    padding: 18px;
+    background: #417690; /* Django admin blue */
+    color: #fff;
+    text-align: center;
+  }
+  .otp-card .card-body {
+    padding: 24px;
+  }
+  .otp-card .form-row {
+    margin-bottom: 18px;
+  }
+  .otp-card label {
+    font-weight: 600;
+    color: #ecf0f1;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .otp-card input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #555;
+    border-radius: 6px;
+    background: #34495e;
+    color: #fff;
+    outline: none;
+    transition: 0.2s;
+  }
+  .otp-card input[type="text"]:focus {
+    border-color: #1abc9c;
+    background: #3b5166;
+  }
+  .otp-card .submit-row {
+    text-align: center;
+    margin-top: 20px;
+  }
+  .otp-card input[type="submit"] {
+    background: #1abc9c;
+    color: #fff;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+  .otp-card input[type="submit"]:hover {
+    background: #16a085;
+  }
+  .errornote {
+    background: #e74c3c;
+    color: #fff;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 600;
+  }
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-10px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+</style>
+
+<div class="otp-card">
+  <h1>OTP Verification</h1>
+  <div class="card-body">
+    {% if error %}
+      <p class="errornote">⚠️ {{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-row">
+        <label for="id_otp">Enter OTP:</label>
+        <input type="text" name="otp" maxlength="6" required id="id_otp" placeholder="6-digit code">
+      </div>
+
+      <div class="submit-row">
+        <input type="submit" value="Verify OTP">
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
