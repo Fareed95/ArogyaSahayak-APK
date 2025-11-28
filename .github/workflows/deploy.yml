@@ -21,7 +21,7 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script: |
-          cd /home/ubuntu/aarogya-sahyak
+          cd /home/ubuntu/aarogya-sahayak
 
           echo ">>> Fetching latest changes..."
           git fetch --all
