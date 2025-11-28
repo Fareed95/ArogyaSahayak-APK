@@ -21,8 +21,8 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script: |
-          cd /home/ubuntu/aarogya-sahyak
-
+          cd /home/ubuntu/aarogya-sahyak/ArogyaSahayak-APK
+        
           echo ">>> Fetching latest changes..."
           git fetch --all
           git reset --hard origin/production
@@ -36,6 +36,7 @@ jobs:
           docker compose pull || docker-compose pull || true
 
           echo ">>> Building and starting containers..."
+          cd docker-compose || true
           docker compose up -d --build || docker-compose up -d --build
 
           echo ">>> Deployment finished 🎉"
