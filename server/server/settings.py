@@ -15,7 +15,8 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'django-backend',
-    '13.205.16.126'
+    '13.205.16.126',
+    'arogya-sahayak-django.crodlin.in'
 
 ]
 
