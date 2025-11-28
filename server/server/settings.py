@@ -14,7 +14,9 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'django-backend'
+    'django-backend',
+    '13.205.16.126'
+
 ]
 
 
@@ -23,11 +25,13 @@ ALLOWED_HOSTS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8001",
+    "http://13.205.16.126:8001"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8001",
+    "http://13.205.16.126:8001"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
