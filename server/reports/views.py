@@ -260,15 +260,26 @@ class UserReportInstancesView(APIView):
         """
         POST: user ka email bhejo aur uske report instances return honge
         """
-        email = request.data.get("email")
-        if not email:
-            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        phone = request.data.get("phone")
+        if not phone:
+            return Response({"error": "Phone is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(phone_number = phone)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
+        pk = request.data.get("pk")  # POST parameter
+        if pk:
+            try:
+                instance = ReportInstance.objects.get(pk=pk, report__user=user)
+            except ReportInstance.DoesNotExist:
+                return Response({"error": "Report instance not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+            serializer = ReportInstanceSerializer(instance)
+            return Response({
+                "email": user.email,
+                "report_instance": serializer.data
+            }, status=status.HTTP_200_OK)
         instances = ReportInstance.objects.filter(report__user=user)
         serializer = ReportInstanceSerializer(instances, many=True)
 
