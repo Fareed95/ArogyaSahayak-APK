@@ -26,13 +26,15 @@ ALLOWED_HOSTS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8001",
-    "http://13.205.16.126:8001"
+    "http://13.205.16.126:8001",
+    "https://aarogya-sahayak-mumbai-hacks.vercel.app"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8001",
-    "http://13.205.16.126:8001"
+    "http://13.205.16.126:8001",
+     "https://aarogya-sahayak-mumbai-hacks.vercel.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
