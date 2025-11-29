@@ -95,22 +95,34 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'server.wsgi.application'
 
+print(os.getenv("Environment"))
+if os.getenv("Environment") == 'production':
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-        'OPTIONS': {
-            'sslmode': 'require',  # required by Supabase
-            'connect_timeout': 10,
-        },
+    print("im in production")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT'),
+            'OPTIONS': {
+                'sslmode': 'require',  # required by Supabase
+                'connect_timeout': 10,
+            },
+        }
     }
-}
 
+else :
+    print("im in development")
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 if 'test' in sys.argv:
     DATABASES = {

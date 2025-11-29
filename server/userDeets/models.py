@@ -10,7 +10,7 @@ class UserDeets(models.Model):
     address = models.TextField(blank=True, null=True, help_text="User's address (optional)")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    fcm_token=models.CharField(null=True,blank=True)
+    fcm_token=models.TextField(null=True,blank=True)
     def __str__(self):
         return f"{self.username} ({self.user.email})"
 

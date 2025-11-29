@@ -6,11 +6,12 @@ from typing import Optional
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query,UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from agents.tool_agent import chatbot, retrieve_all_threads, describe_image
+from agents.tool_agent import chatbot, retrieve_all_threads, upload_report
+import base64
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 from starlette.websockets import WebSocketState
 
-UPLOAD_DIR = "uploaded_images"
+UPLOAD_DIR = "uploaded_images" 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # ---------- Utilities ----------
@@ -197,26 +198,27 @@ async def chat_endpoint(websocket: WebSocket, thread_id: Optional[str] = Query(N
                         "type": "error", 
                         "message": f"Error fetching thread: {e}"
                     }))
-            elif msg_type == "uploading_file":
-                file_base64 = data.get("file")  # Base64 from frontend
 
-                # Acknowledge
-                await safe_send(websocket,json.dumps({
-                    "type": "upload_ack",
-                    "message": "Image received, analyzing..."
+            elif msg_type == "upload_report_direct":
+                base64_pdf = data["file_base64"]
+                filename = data.get("filename", "report.pdf")
+                title = data.get("title", "Untitled Report")
+
+                pdf_bytes = base64.b64decode(base64_pdf)
+
+                # --- DIRECT TOOL INVOCATION ---
+                result = upload_report.invoke({
+                    "title": title,
+                    "file_bytes": pdf_bytes,
+                    "filename": filename
+                })
+
+                await safe_send(websocket, json.dumps({
+                    "type": "report_uploaded",
+                    "content": result
                 }))
 
-                # Call vision tool directly
-                result = describe_image.invoke({"image_base64": file_base64})
-
-                # Feed analysis into conversation (memory saved)
-                await stream_to_ws(
-                    websocket,
-                    f"User uploaded an image. Here is the analysis: {result}",
-                    thread_id,
-                )
-
-
+        
     except WebSocketDisconnect:
         print("Client disconnected.")
     except Exception as e:

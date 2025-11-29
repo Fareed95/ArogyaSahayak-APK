@@ -22,87 +22,38 @@ load_dotenv()
 google_api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=google_api_key)
 
-
 @tool
-def login(email: str, password: str) -> str:
+def upload_report(title: str, file_bytes: bytes, filename: str) -> str:
     """
-    Hit the backend API to authenticate user via Django/DRF.
+    Upload a PDF report to Django API as multipart/form-data.
+    Params:
+        title: Title of the report
+        file_bytes: Raw PDF file bytes
+        filename: Name of the uploaded file (example: 'report.pdf')
     """
-    url = "http://django-backend:8000/api/authentication/login"
 
-    
+    url = "http://django-backend:8000/api/reports/report"
+
     try:
-        response = requests.post(url, json={
-            "email": email,
-            "password": password
-        })
+        # Multipart form-data
+        files = {
+            "file": (filename, file_bytes, "application/pdf")
+        }
 
-        # If login success
+        data = {
+            "title": title
+        }
+
+        response = requests.post(url, files=files, data=data)
+
         if response.status_code == 200:
-            data = response.json()
-            return f"Login Successful! 🎉\nToken: {data.get('jwt')}"
-        
-        # If credentials are wrong
-        return f"Login failed ❌: {response.text}"
+            return f"Report Uploaded Successfully 🎉\n\nResponse: {response.json()}"
+        else:
+            return f"Upload Failed ❌: {response.text}"
 
     except Exception as e:
-        print(f"Error during login: {e}")
         return f"Server error 🔥: {str(e)}"
 
-@tool
-def describe_image(image_path: str, prompt: str = "Describe the image") -> str:
-    """
-    Analyze the image using Gemini Vision + return rich markdown output
-    including headings, bullets, prompt-specific details & structured formatting.
-    """
-
-    # Load & convert image
-    try:
-        image = Image.open(image_path).convert("RGB")
-    except Exception:
-        return "❌ Image could not be opened. Please upload a valid PNG/JPG image."
-
-    # Convert to bytes
-    buffer = io.BytesIO()
-    image.save(buffer, format="JPEG")
-    image_bytes = buffer.getvalue()
-
-    # Send to Gemini
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[
-                {
-                    "text": f"""
-You must analyze this image **in detail**.
-
-### Required Response Format
-- Use Markdown only
-- Include a Title
-- Use bullet points, sub-headings
-- Include a section: **🧠 Prompt-Specific Insight** based on:
-**"{prompt}"**
-
-### Avoid
-- Do not repeat general statements unnecessarily
-- Do not ask questions
-"""
-                },
-                {"inline_data": {"mime_type": "image/jpeg", "data": image_bytes}}
-            ],
-        )
-
-        # Force markdown semantics
-        return f"""# 🖼️ Image Analysis
-
-{response.text}
-
----
-📌 **Prompt Used:** `{prompt}`
-"""
-
-    except Exception as e:
-        return f"⚠️ Vision API Error: {str(e)}"
 
 # -------------------
 # 1. LLM
@@ -113,7 +64,7 @@ llm = ChatOpenAI()
 # 2. Tools
 # -------------------
 # Tools
-tools = [ login, describe_image ]
+tools = [ upload_report]
 
 llm_with_tools = llm.bind_tools(tools)
 

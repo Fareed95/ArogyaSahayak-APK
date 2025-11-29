@@ -197,6 +197,50 @@ class LogoutView(APIView):
         response.data = {"message": "Logged out successfully"}
         return response
 
+
+class TelegramLogin(APIView):
+    @csrf_exempt
+    def post(self, request):
+        phone = request.data.get('phone')
+        user = User.objects.filter(phone_number = phone).first()
+        if user :
+            return Response({'password':False})
+       
+        return Response({'password':True})
+    
+    def put(self, request):
+        phone = request.data.get('phone')
+        password = request.data.get('password')
+        name = request.data.get("name")
+        user = User.objects.create(name= name, phone_number = phone )
+        user.set_password(password)
+        user.save()
+        return Response({'detail':"data saved sucessfully"})
+
+
+class TemporaryLogin(APIView):
+    @csrf_exempt
+    def post(self, request):
+        phone = request.data.get("phone")
+        password = request.data.get("password")
+        user = User.objects.filter(phone_number = phone).first()
+        if user is None:
+            raise AuthenticationFailed('User Not found!')
+
+        if not user.check_password(password):
+            raise AuthenticationFailed('Incorrect Password')
+        payload = {
+            'id': user.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7),
+            'iat': datetime.datetime.utcnow()
+        }
+
+        token = jwt.encode(payload, 'secret', algorithm='HS256')
+        return Response({'jwt': token})
+
+
+
+
 # ----------------- Password Reset Request -----------------
 class PasswordResetRequestView(APIView):
 
