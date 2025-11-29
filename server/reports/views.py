@@ -189,8 +189,8 @@ MAX_HISTORY = 10
 class UserChatBotAPIView(APIView):
 
     def post(self, request):
-        user = authenticate_request(request, need_user=True)
-        print(user)
+        phone = request.data.get("phone")
+        user = User.objects.filter(phone_number=phone).first()
     
         user_message = request.data.get("message", "").strip()
         print(user_message)
@@ -239,8 +239,7 @@ class UserChatBotAPIView(APIView):
 
         # Initialize LangChain chat
         chat = ChatOpenAI(model="gpt-4")
-        ai_response = chat(messages)
-
+        ai_response = chat.invoke(messages)
         # Append AI response to history
         history.append({"role": "human", "content": user_message})
         history.append({"role": "ai", "content": ai_response.content})
